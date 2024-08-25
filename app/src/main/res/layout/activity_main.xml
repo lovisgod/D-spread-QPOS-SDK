@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/test_get_agent_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="18dp"
+        android:text="Get Agent details"
+        app:layout_constraintBottom_toTopOf="@+id/test_initialize_pos"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <Button
+        android:id="@+id/test_initialize_pos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Initialize pos sdk"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/test_get_agent_details"
+        tools:layout_editor_absoluteX="152dp"
+        tools:layout_editor_absoluteY="215dp" />
+
+    <Button
+        android:id="@+id/test_search_device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/test_initialize_pos"
+        android:text="Search Device"
+        tools:layout_editor_absoluteX="155dp"
+        tools:layout_editor_absoluteY="289dp" />
+
+    <Button
+        android:id="@+id/test_connect_device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/test_search_device"
+        android:text="Connect Device"
+        tools:layout_editor_absoluteX="155dp"
+        tools:layout_editor_absoluteY="289dp" />
+
+    <Button
+        android:id="@+id/test_trans"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/test_connect_device"
+        android:text="Test Transaction"
+        tools:layout_editor_absoluteX="155dp"
+        tools:layout_editor_absoluteY="289dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
