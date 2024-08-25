@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity(),  EMVEvents{
 
    fun handleClicks(){
      testGetAgentDetailBtn.setOnClickListener {
-         QposInitializer.getInstance().getAgentDetails("9e1ff881-7639-4103-a8df-34c3d567c2a1", this, this)
+         QposInitializer.getInstance().getAgentDetails("", this, this)
      }
 
      testInitBtn.setOnClickListener {
@@ -157,6 +157,6 @@ class MainActivity : AppCompatActivity(),  EMVEvents{
 class SampleApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        QposInitializer.getInstance().initPayble("MnhaRntOiN4/zSSIp0ZuLH1FAM440wy2jk9KDZ/ch+Q=&prd", "64bfd702-ef2b-42f3-8c47-3a6a0b7139ad")
+        QposInitializer.getInstance().initPayble("", "")
     }
 }
