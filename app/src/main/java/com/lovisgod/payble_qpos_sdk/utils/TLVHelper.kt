@@ -1,6 +1,8 @@
 package com.lovisgod.payble_qpos_sdk.utils
 
 import android.util.Log
+import com.lovisgod.kozen_p.PaybleConstants
+import com.lovisgod.payble_qpos_sdk.qpos_mini.QposInitializer
 
 class TLVHelper {
 
@@ -71,14 +73,19 @@ class TLVHelper {
                         Log.d("TLVHelper", "c7value is generated $c7Value")
 
                         pinBlock = if (c7Value != null) {
-//                            getPinBlock(parsCarN, "", "")
-                            c7Value
+                            val pinK = QposInitializer.getInstance().prefhelper.getString(EncryptedPrefsHelper.PIN_KEY, "")
+                            getPinBlock(parsCarN, pinK.toString(), PaybleConstants.pxtxt)
+//                            c7Value
                         } else {
                             null
                         }
                         Log.d("TLVHelper", "pinBlock string $pinBlock")
                     }
-                    "5f34" -> panSequenceNumber = tlv.value
+                    "5f34" -> {
+                        panSequenceNumber = tlv.value
+                        Log.d("TLVHelper", "csn is $panSequenceNumber")
+
+                    }
                     "57" -> track2Data = tlv.value
                     "9f4c" -> iccData = tlv.value
                     "5f20" -> {
@@ -110,13 +117,16 @@ class TLVHelper {
                 for (element in onlineMessageTLV) {
                     if (tag.tag == element.tag.toUpperCase()) {
                         tlvx.append("${element.tag}${element.length}${element.value}")
+                        if (element.tag.lowercase() == "5f34") {
+                            panSequenceNumber = element.value
+                        }
                         Log.d("TLVHelper", "request tag ${tag.tag} value ${element.value}")
 
                         tagValues.add(tag.tag to element.value)
                     }
                 }
                 Log.d("TLVHelper", "Tlvx : ${tlvx.toString().toUpperCase()}")
-                iccString += tlvx.toString().uppercase()
+                iccString = tlvx.toString().uppercase()
             }
             Log.d("TLVHelper", "The tag values are $tagValues")
         }
@@ -127,17 +137,18 @@ class TLVHelper {
     }
 
     private fun getPinBlock(parsCarN: String, pinKey: String, clearPinText: String): String {
-        return ""
+        return getPinBlock0(pan = parsCarN, key = pinKey, clearPin = clearPinText)
     }
 
     private fun hexToAscii(hexString: String): String {
-        val buffer = StringBuilder()
-        for (i in hexString.indices step 2) {
-            val hexChar = hexString.substring(i, i + 2)
-            val charCode = hexChar.toInt(16)
-            buffer.append(charCode.toChar())
+        val output = StringBuilder("")
+        var i = 0
+        while (i < hexString.length) {
+            val str = hexString.substring(i, i + 2)
+            output.append(str.toInt(16).toChar())
+            i += 2
         }
-        return buffer.toString()
+        return output.toString()
     }
 
 

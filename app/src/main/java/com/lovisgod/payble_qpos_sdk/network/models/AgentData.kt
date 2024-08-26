@@ -2,6 +2,7 @@ package com.lovisgod.payble_qpos_sdk.network.models
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
 import java.util.*
 
 data class AgentData(
@@ -84,4 +85,9 @@ data class Terminal(
 fun Any.toJson(): String {
     val gson = Gson()
     return gson.toJson(this)
+}
+
+inline fun <reified T> String.fromJson(): T {
+    val gson = Gson()
+    return gson.fromJson(this, object : TypeToken<T>() {}.type)
 }

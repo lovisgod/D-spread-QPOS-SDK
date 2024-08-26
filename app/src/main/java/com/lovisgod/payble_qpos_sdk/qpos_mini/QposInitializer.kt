@@ -38,7 +38,7 @@ class QposInitializer private constructor() {
     private val LOCATION_CODE = 101
     lateinit var pos: QPOSService
     private var handler: Handler? = null
-
+    lateinit var prefhelper: EncryptedPrefsHelper
     val api = RetrofitInstance.api
 
 
@@ -46,9 +46,10 @@ class QposInitializer private constructor() {
 //        // make api call to assign terminal to agent
 //    }
 
-    fun initPayble(api_key: String, merchant_id: String) {
+    fun initPayble(api_key: String, merchant_id: String, context: Context) {
         PaybleConstants.api_key = api_key
         PaybleConstants.mid = merchant_id
+        prefhelper = EncryptedPrefsHelper(context)
     }
 
     fun getAgentDetails(agentId: String, context: Context, emvEvents: EMVEvents) {
@@ -164,7 +165,7 @@ class QposInitializer private constructor() {
     fun startTrade() {
         try {
             val keyIndex = 0
-            pos.setFormatId(QPOSService.FORMATID.MKSK_PLAIN)
+            pos.setFormatId(QPOSService.FORMATID.DUKPT_MKSK)
             pos.setCardTradeMode(CardTradeMode.SWIPE_TAP_INSERT_CARD)
             pos.doTrade(keyIndex)
         } catch (e: Exception) {

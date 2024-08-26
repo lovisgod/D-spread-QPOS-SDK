@@ -1,5 +1,7 @@
 package com.lovisgod.payble_qpos_sdk.utils
 
+import com.lovisgod.payble_qpos_sdk.CardTypeUtils
+
 class CardTransactionData {
 
     var c0Value: String? = null
@@ -32,21 +34,23 @@ class CardTransactionData {
         private set
 
     fun setValuesFromMap(mapData: Map<String, String>) {
+        val track2Datax = mapData["encTrack2"]?.let { Track2DataHelper.create( track2Data = it) }
         c0Value = mapData["iccCardAppexpiryDate"]
         c1Value = mapData["pinKsn"]
         c2Value = mapData["serviceCode"]
-        c7Value = mapData["maskedPAN"]
-        realPan = mapData["encPAN"]
+        c7Value = mapData["pinBlock"]
+        realPan = track2Datax?.panData
         pinBlock = mapData["pinBlock"]
         panSequenceNumber = mapData["cardSquNo"]
-        track2Data = mapData["encTrack2"]
+        track2Data = track2Datax?.track2
         iccData = mapData["iccdata"]
         cardHolderName = mapData["cardholderName"]
-        cardType = mapData["formatID"]
-        cardExpiry = mapData["expiryDate"]
-        cardPan = mapData["maskedPAN"]
-        iccString = mapData["iccCardAppexpiryDate"]  // Or any other relevant value
+        cardType = CardTypeUtils.getCardType(track2Datax?.panData.toString()).name
+        cardExpiry = track2Datax?.cardExpiry
+        cardPan = track2Datax?.panData
+        iccString = mapData["iccdata"]  // Or any other relevant value
     }
+
 }
 
 //fun main() {

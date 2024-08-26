@@ -29,6 +29,7 @@ object PaybleConstants {
     var currencyCode = "566"
     var api_key = ""
     var mid = ""
+    var pxtxt = ""
 
 
 

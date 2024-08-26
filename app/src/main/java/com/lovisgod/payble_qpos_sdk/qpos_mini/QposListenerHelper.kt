@@ -1,13 +1,9 @@
 package com.lovisgod.payble_qpos_sdk.qpos_mini
 
-import android.R
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbManager
 import android.util.Log
-import android.view.View
 import com.dspread.print.util.TRACE
 import com.dspread.xpos.CQPOSService
 import com.dspread.xpos.QPOSService
@@ -23,12 +19,19 @@ import com.lovisgod.kozen_p.PaybleConstants.transactionType
 import com.lovisgod.kozen_p.PaybleConstants.transactionTypeString
 import com.lovisgod.payble_qpos_sdk.CardTypeUtils
 import com.lovisgod.payble_qpos_sdk.EMVEvents
-import com.lovisgod.payble_qpos_sdk.utils.CardTransactionData
+import com.lovisgod.payble_qpos_sdk.network.RetrofitInstance
+import com.lovisgod.payble_qpos_sdk.network.models.AgentData
+import com.lovisgod.payble_qpos_sdk.network.models.TerminalKeyResponse
+import com.lovisgod.payble_qpos_sdk.network.models.TransactionData
+import com.lovisgod.payble_qpos_sdk.network.models.fromJson
 import com.lovisgod.payble_qpos_sdk.utils.EncryptedPrefsHelper
 import com.lovisgod.payble_qpos_sdk.utils.FileUtils
 import com.lovisgod.payble_qpos_sdk.utils.QPOSConversionUtil
 import com.lovisgod.payble_qpos_sdk.utils.TLVHelper
 import com.lovisgod.payble_qpos_sdk.utils.UtilsQpos.getKeyIndex
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Hashtable
@@ -442,19 +445,74 @@ class QposListenerHelper(val pos: QPOSService, val emvEvents: EMVEvents, val con
         TRACE.d("onRequestOnlineProcess$tlv")
         val decodeData: Hashtable<String, String> = pos.anlysEmvIccData(tlv)
         TRACE.d("anlysEmvIccData(tlv):$decodeData")
-//        val tlvHelper = TLVHelper()
-//        tlvHelper.parseTLVData(tlv)
+        val tlvHelper = TLVHelper()
+        tlvHelper.parseTLVData(tlv)
 
-        val cardTransactionData = CardTransactionData()
-        cardTransactionData.setValuesFromMap(decodeData)
+//        // THIS IS WHEN WE USE MK_SK_PLAIN
+//        val cardTransactionData = CardTransactionData()
+//        cardTransactionData.setValuesFromMap(decodeData)
 
         // Now you can access the values from cardTransactionData object
-        println("Card Holder Name: ${cardTransactionData.cardHolderName}")
-        println("PIN Block: ${cardTransactionData.pinBlock}")
-        println("ICC Data: ${cardTransactionData.iccData}")
+        println("Card Holder Name: ${tlvHelper.cardHolderName}")
+        println("PIN Block: ${tlvHelper.pinBlock}")
+        println("ICC Data: ${tlvHelper.iccString}")
+        println("track 2 data: ${tlvHelper.track2Data}")
+        println("card expiry: ${tlvHelper.cardExpiry}")
+        println("card type: ${tlvHelper.cardType}")
+        println("CSN: ${tlvHelper.panSequenceNumber}")
 
         // send transaction online here
+        val sharedPreferences = EncryptedPrefsHelper(context)
+        val agentData :AgentData = sharedPreferences.getString(EncryptedPrefsHelper.AGENT_DATA, "").toString().fromJson()
+        val terminalData: TerminalKeyResponse = sharedPreferences.getString(EncryptedPrefsHelper.TERMINAL_DATA, "").toString().fromJson()
+        val api = RetrofitInstance.api
 
+        val call = api.makeCardTransaction(
+            version = "1",
+            save_trans = "1",
+            api_key = PaybleConstants.api_key,
+            mid = PaybleConstants.mid,
+            sskey = terminalData.data.sessionKey,
+            user_subject = agentData.data.telephone.replaceFirst("+234", "0"),
+            data = TransactionData(
+                merchantCategoryCode = terminalData.data.params.data.merchantCategoryCode,
+                terminalCode = terminalData.data.params.data.terminalCode,
+                merchantId = terminalData.data.params.data.merchantId,
+                merchantName = terminalData.data.params.data.merchantName,
+                haspin = !tlvHelper.pinBlock.isNullOrEmpty(),
+                track2Data = tlvHelper.track2Data.toString().uppercase(),
+                panSequenceNumber = tlvHelper.panSequenceNumber.toString(),
+                cardHolderName = tlvHelper.cardHolderName.toString(),
+                cardType = tlvHelper.cardType.toString(),
+                cardExpiry = tlvHelper.cardExpiry.toString(),
+                amount = PaybleConstants.transAmount,
+                pinBlock = tlvHelper.pinBlock.toString().uppercase(),
+                posDataCode = "510101511344101",
+                iccString = tlvHelper.iccString.toString()
+            )
+          )
+
+        emvEvents.onAgentTransactionOnline()
+
+        call.enqueue(object : Callback<Any> {
+            override fun onResponse(call: Call<Any>, response: Response<Any>) {
+                if (response.isSuccessful) {
+                    val transResponse = response.body()
+                    if (transResponse != null) {
+                        emvEvents.onAgentTransactionOnlineResponse(transResponse)
+                    }
+                    Log.d("get payment details", "response: $transResponse")
+                } else {
+                    emvEvents.onAgentTransactionError(message = "Error: ${response.code()}")
+                    Log.e("get payment details", "Error: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<Any>, t: Throwable) {
+                emvEvents.onAgentTransactionError(message = "Failure: ${t.message}")
+                Log.e("get payment details", "Failure: ${t.message}")
+            }
+        })
         val str = "8A023030" //Currently the default value,
 
         pos.sendOnlineProcessResult(str) //脚本通知/55域/ICCDATA
@@ -674,11 +732,12 @@ class QposListenerHelper(val pos: QPOSService, val emvEvents: EMVEvents, val con
     override fun onRequestSetPin() {
         TRACE.i("onRequestSetPin()")
         val pinText = emvEvents.onPinInput()
+        PaybleConstants.pxtxt = pinText.toString()
         val pinBlock = buildCvmPinBlock(
             pos.getEncryptData(),
             pinText.toString()
         ) // build the ISO format4 pin block
-        pos.sendCvmPin(pinBlock, true)
+        pos.sendPin(QPOSConversionUtil.HexStringToByteArray(pinText), false)
     }
 
     override fun onReturnSetMasterKeyResult(isSuccess: Boolean) {

@@ -28,4 +28,8 @@ interface EMVEvents {
     fun onAgentDetailsDownloading()
     fun onAgentDetailsDownloaded()
     fun onAgentDetailsDownloadError(message: String)
+
+    fun onAgentTransactionOnline()
+    fun onAgentTransactionOnlineResponse(response: Any)
+    fun onAgentTransactionError(message: String)
 }

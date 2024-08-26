@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity(),  EMVEvents{
     }
 
     override fun onPinInput(): String? {
-        return "1994"
+        return "1234"
     }
 
     override fun onEmvProcessed(data: Any) {
@@ -152,11 +152,23 @@ class MainActivity : AppCompatActivity(),  EMVEvents{
     override fun onAgentDetailsDownloadError(message: String) {
         Toast.makeText(this, "Agent details download Error", Toast.LENGTH_LONG).show()
     }
+
+    override fun onAgentTransactionOnline() {
+        Toast.makeText(this, "Transaction going online", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onAgentTransactionOnlineResponse(response: Any) {
+        Toast.makeText(this, "Transaction response $response", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onAgentTransactionError(message: String) {
+        Toast.makeText(this, "Transaction Error", Toast.LENGTH_LONG).show()
+    }
 }
 
 class SampleApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        QposInitializer.getInstance().initPayble("", "")
+        QposInitializer.getInstance().initPayble("", "", applicationContext)
     }
 }
