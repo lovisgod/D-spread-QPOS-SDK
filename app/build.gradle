@@ -1,5 +1,6 @@
 plugins {
-    alias(libs.plugins.androidApplication)
+//    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.library)
     alias(libs.plugins.jetbrainsKotlinAndroid)
 }
 
@@ -8,7 +9,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.lovisgod.payble_qpos_sdk"
+//        applicationId "com.lovisgod.payble_qpos_sdk"
         minSdk 24
         targetSdk 34
         versionCode 1
