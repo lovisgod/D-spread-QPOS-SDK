@@ -4,8 +4,8 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("maven-publish")
 }
-def githubProperties = new Properties()
-githubProperties.load(new FileInputStream(rootProject.file("github.properties")))
+//def githubProperties = new Properties()
+//githubProperties.load(new FileInputStream(rootProject.file("github.properties")))
 def getVersionName = { ->
     return "0.0.1"  // Replace with version Name
 }
@@ -18,8 +18,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/lovisgod/D-spread-QPOS-SDK")
             credentials {
-                username = githubProperties['gpr.usr'] ?: System.getenv("GPR_USER")
-                password = githubProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
             }
         }
     }
