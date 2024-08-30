@@ -23,14 +23,14 @@ publishing {
             }
         }
     }
-    publications {
-        bar(MavenPublication) {
-            groupId 'com.lovisgod' // Replace with group ID
-            artifactId getArtificatId()
-            version getVersionName()
-            artifact("$buildDir/outputs/aar/${getArtificatId()}-release.aar")
-        }
-    }
+//    publications {
+//        bar(MavenPublication) {
+//            groupId 'com.lovisgod' // Replace with group ID
+//            artifactId getArtificatId()
+//            version getVersionName()
+//            artifact("$buildDir/outputs/aar/${getArtificatId()}-release.aar")
+//        }
+//    }
 }
 
 android {
